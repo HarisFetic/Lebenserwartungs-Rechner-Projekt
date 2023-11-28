@@ -1,4 +1,4 @@
-Entity,Code,Year,"Indicator:Prevalence of obesity among adults, BMI &GreaterEqual; 30 (crude estimate) (%) - Sex:Both sexes"
+Entity,Code,Year,"ObesityRate (BMI > 30)"
 Afghanistan,AFG,1975,0.4
 Afghanistan,AFG,1976,0.4
 Afghanistan,AFG,1977,0.5
