@@ -50,7 +50,7 @@ def predict():
     feature_vector['Sex_0'], feature_vector['Sex_1'] = sex_encoding
     for i, val in enumerate(country_encoding):
         feature_vector[f'Entity_{i}'] = val
-    feature_vector['Year'] = 2030
+    feature_vector['Year'] = 2021
 
     # Drop columns not used in training and ensure correct order
     required_columns = ['Entity_0', 'Entity_1', 'Entity_2', 'Entity_3', 'Entity_4', 
