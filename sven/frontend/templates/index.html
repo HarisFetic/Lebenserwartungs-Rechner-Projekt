@@ -6,23 +6,79 @@
 <body>
     <h2>Enter Your Data</h2>
     <form action="/predict" method="post">
-        <input type="number" name="Year" placeholder="Year" required>
-        
-        <label for="Sex">Sex:</label>
-        <select name="Sex">
-            <option value="0">Male</option>
-            <option value="1">Female</option>
-        </select>
-
-        <label for="Country">Country:</label>
-        <select name="Country">
-            <!-- List of countries -->
-            <option value="Algeria">Algeria</option>
-            <option value="Argentina">Argentina</option>
-            <!-- Add other countries -->
-        </select>
-
+        <div>
+            <label for="Age">Age:</label>
+            <input type="number" name="Age" placeholder="Age" required>
+        </div>
+        <div>
+            <label for="Sex">Sex:</label>
+            <select name="Sex">
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+            </select>
+        </div>
+        <div>
+            <label for="Country">Country:</label>
+            <select name="Country">
+                {% for country in countries %}
+                <option value="{{ country }}">{{ country }}</option>
+                {% endfor %}
+            </select>
+        </div>
         <button type="submit">Predict</button>
     </form>
+
+    {% if prediction_text %}
+    <div class="prediction-label">Predicted Remaining Life Expectancy:</div>
+    <div class="prediction-container">
+        {% set prediction_parts = prediction_text.split(': ')[1].split(', ') %}
+        {% for part in prediction_parts %}
+            <div class="prediction-part">{{ part }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+            background: url('/static/images/background.png') no-repeat center center fixed; 
+            background-size: cover;
+        }
+
+        .prediction-label {
+            font-size: 1.5em; /* Larger font size for label */
+            text-align: center; /* Center the label */
+            margin-top: 20px;
+        }
+        .prediction-container {
+            text-align: center; /* Center the text */
+            margin-top: 10px;
+        }
+        .prediction-part {
+            background-color: rgba(255, 255, 255, 0.8);
+            display: inline-block; /* Display parts inline */
+            margin: 5px;
+            padding: 10px;
+            border-radius: 5px; /* Rounded corners for the boxes */
+            box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.2); /* A subtle shadow */
+        }
+
+        form {
+            background: rgba(255, 255, 255, 0.8); 
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        label, select, input, button {
+            margin: 5px;
+        }
+    </style>
 </body>
 </html>
