@@ -1,12 +1,38 @@
 from flask import Flask, request, render_template
 import pandas as pd
-import joblib
 import numpy as np
+import torch
+import joblib
+import torch.nn as nn
 
+
+# Define your Neural Network class
+class NeuralNet(nn.Module):
+    def __init__(self, input_size):
+        super(NeuralNet, self).__init__()
+        self.fc1 = nn.Linear(input_size, 256)
+        self.relu1 = nn.ReLU()
+        self.fc2 = nn.Linear(256, 128)
+        self.relu2 = nn.ReLU()
+        self.fc3 = nn.Linear(128, 1)
+
+    def forward(self, x):
+        x = self.fc1(x)
+        x = self.relu1(x)
+        x = self.fc2(x)
+        x = self.relu2(x)
+        x = self.fc3(x)
+        return x
+    
 app = Flask(__name__)
 
-# Load the model
-model = joblib.load('linreg.joblib')
+# Create an instance of the model and load the state dict
+model = NeuralNet(22)  # input size
+model.load_state_dict(torch.load('FNN_model.pth'))
+model.eval()  # Set the model to evaluation mode
+
+# Load the StandardScaler
+scaler = joblib.load('scaler.save')
 
 # Read country names and their encodings from the CSV file
 countries_df = pd.read_csv('countries.csv')
@@ -36,6 +62,9 @@ def predict():
     age_groups = [0, 10, 15, 25, 45, 65, 80]
     closest_age = min(age_groups, key=lambda x: abs(x - input_age))
 
+    # Debug: Print column names of the loaded DataFrame
+    print("Columns in comparison_data:", comparison_data.columns.tolist())
+
     # Filter data for the year 2020, closest age, matching sex, and country
     matched_row = comparison_data[(comparison_data['Year'] == 2020) &
                                   (comparison_data['Entity'] == country_name) &
@@ -45,27 +74,39 @@ def predict():
         return render_template('index.html', prediction_text='No matching data found.',
                                countries=countries_df['Entity'].tolist())
 
-    # Update the matched row with binary encodings for sex, country, and year
-    feature_vector = matched_row.iloc[0]
-    feature_vector['Sex_0'], feature_vector['Sex_1'] = sex_encoding
-    for i, val in enumerate(country_encoding):
-        feature_vector[f'Entity_{i}'] = val
-    feature_vector['Year'] = 2021
 
-    # Drop columns not used in training and ensure correct order
+    # Convert the matched row to a DataFrame
+    feature_vector_df = pd.DataFrame([matched_row.iloc[0]])
+
+    # Update sex and country encoding
+    feature_vector_df['Sex_0'], feature_vector_df['Sex_1'] = sex_encoding
+    for i, val in enumerate(country_encoding):
+        feature_vector_df[f'Entity_{i}'] = val
+
+    # Define required columns
     required_columns = ['Entity_0', 'Entity_1', 'Entity_2', 'Entity_3', 'Entity_4', 
                         'Entity_5', 'Entity_6', 'Year', 'Sex_0', 'Sex_1', 'Age', 
                         'Gov expenditure on education (%)', 'Internet usage (% of population)', 
                         'Access to electricity (% of population)', 'Access to Sanitation (% of population)', 
                         'Smoking Adults (% of population)', 'GDP ($)', 
-                        'Meat consumptionm in kg per year per capita', 'ObesityRate (BMI > 30)', 
+                        'Meat consumption in kg per year per capita', 'ObesityRate (BMI > 30)', 
                         'Healthcare spending (% of GDP)', 
                         'air pollution, annual exposure (micrograms per cubic meter)', 
                         'Electoral democracy index']
-    feature_vector = feature_vector[required_columns]
+
+    # Ensure the feature vector is in the correct order
+    feature_vector = feature_vector_df[required_columns].to_numpy().flatten()
+
+    # Scale the features
+    scaled_features = scaler.transform([feature_vector])
+
+    # Convert to tensor
+    input_tensor = torch.tensor(scaled_features, dtype=torch.float32)
 
     # Make a prediction
-    prediction = model.predict([np.array(feature_vector)])[0]
+    with torch.no_grad():
+        prediction_tensor = model(input_tensor)
+        prediction = prediction_tensor.item()  # Convert to a regular Python number
 
     # Break down the prediction into years, days, hours, minutes, and seconds
     years = int(prediction)
@@ -79,8 +120,19 @@ def predict():
 
     prediction_text = f'Predicted Remaining Life Expectancy: {years} years, {days} days, {hours} hours, {minutes} minutes, {seconds} seconds'
 
-    return render_template('index.html', prediction_text=prediction_text,
-                       countries=countries_df['Entity'].tolist())
+
+    # Extract the components of the remaining life expectancy
+    components = {
+        'years': years,
+        'days': days,
+        'hours': hours,
+        'minutes': minutes,
+        'seconds': seconds
+    }
+
+    return render_template('index.html', components=components,
+                           countries=countries_df['Entity'].tolist(), request=request)
+   
 
 if __name__ == "__main__":
     app.run(debug=True)

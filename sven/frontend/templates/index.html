@@ -2,6 +2,45 @@
 <html>
 <head>
     <title>Life Expectancy Prediction</title>
+
+    <script>
+        function startCountdown(components) {
+            var { years, days, hours, minutes, seconds } = components;
+
+            function updateCountdown() {
+                // Decrement the time
+                if(seconds > 0) {
+                    seconds -= 1;
+                } else if (minutes > 0) {
+                    minutes -= 1;
+                    seconds = 59;
+                } else if (hours > 0) {
+                    hours -= 1;
+                    minutes = 59;
+                } else if (days > 0) {
+                    days -= 1;
+                    hours = 23;
+                } else if (years > 0) {
+                    years -= 1;
+                    days = 364;
+                } else {
+                    // Stop the countdown when all components are zero
+                    clearInterval(interval);
+                }
+
+                // Update the display
+                document.getElementById('years').textContent = years + ' years';
+                document.getElementById('days').textContent = days + ' days';
+                document.getElementById('hours').textContent = hours + ' hours';
+                document.getElementById('minutes').textContent = minutes + ' minutes';
+                document.getElementById('seconds').textContent = seconds + ' seconds';
+            }
+
+            // Update the countdown every second
+            var interval = setInterval(updateCountdown, 1000);
+        }
+    </script>
+
 </head>
 <body>
     <h2>Enter Your Data</h2>
@@ -28,14 +67,18 @@
         <button type="submit">Predict</button>
     </form>
 
-    {% if prediction_text %}
-    <div class="prediction-label">Predicted Remaining Life Expectancy:</div>
+    {% if components %}
     <div class="prediction-container">
-        {% set prediction_parts = prediction_text.split(': ')[1].split(', ') %}
-        {% for part in prediction_parts %}
-            <div class="prediction-part">{{ part }}</div>
-        {% endfor %}
+        <div id="years" class="time-component">{{ components.years }} years</div>
+        <div id="days" class="time-component">{{ components.days }} days</div>
+        <div id="hours" class="time-component">{{ components.hours }} hours</div>
+        <div id="minutes" class="time-component">{{ components.minutes }} minutes</div>
+        <div id="seconds" class="time-component">{{ components.seconds }} seconds</div>
     </div>
+    <script>
+        // Start the countdown with the initial values
+        startCountdown({{ components|tojson|safe }})
+    </script>
     {% endif %}
 
     <style>
@@ -50,6 +93,17 @@
             flex-direction: column;
             background: url('/static/images/background.png') no-repeat center center fixed; 
             background-size: cover;
+        }
+
+        .time-component {
+        background-color: white; /* White background */
+        padding: 10px; /* Padding inside the box */
+        margin: 5px; /* Margin outside the box */
+        border-radius: 5px; /* Rounded corners */
+        box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.2); /* Box shadow for depth */
+        display: inline-block; /* Display components in a line */
+        min-width: 100px; /* Minimum width for each box */
+        text-align: center; /* Center the text inside the box */
         }
 
         .prediction-label {
