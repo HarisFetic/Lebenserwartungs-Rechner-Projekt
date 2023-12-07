@@ -6,7 +6,7 @@ import joblib
 import torch.nn as nn
 
 
-# Define your Neural Network class
+# Define Neural Network class
 class NeuralNet(nn.Module):
     def __init__(self, input_size):
         super(NeuralNet, self).__init__()
@@ -118,7 +118,7 @@ def predict():
     minutes = int(minutes_fraction)
     seconds = int((minutes_fraction - minutes) * 60)
 
-    prediction_text = f'Predicted Remaining Life Expectancy: {years} years, {days} days, {hours} hours, {minutes} minutes, {seconds} seconds'
+    # prediction_text = f'Predicted Remaining Life Expectancy: {years} years, {days} days, {hours} hours, {minutes} minutes, {seconds} seconds'
 
 
     # Extract the components of the remaining life expectancy
