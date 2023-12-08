@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Life Expectancy Prediction</title>
 
@@ -9,7 +10,7 @@
 
             function updateCountdown() {
                 // Decrement the time
-                if(seconds > 0) {
+                if (seconds > 0) {
                     seconds -= 1;
                 } else if (minutes > 0) {
                     minutes -= 1;
@@ -42,9 +43,17 @@
     </script>
 
 </head>
+
 <body>
     <h2>Enter Your Data</h2>
     <form action="/predict" method="post">
+        <div>
+            <label for="Model">Choose a Prediction Model:</label>
+            <select name="Model">
+                <option value="FNN">Neural Network</option>
+                <option value="XGBoost">XGBoost</option>
+            </select>
+        </div>
         <div>
             <label for="Age">Age:</label>
             <input type="number" name="Age" placeholder="Age" required>
@@ -64,6 +73,23 @@
                 {% endfor %}
             </select>
         </div>
+        <div>
+            <label for="Smoking">Do you smoke?</label>
+            <select name="Smoking">
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+            </select>
+        </div>
+        <!-- 
+        <div>
+            <label for="Height">Height (in meters):</label>
+            <input type="number" name="Height" step="0.01" placeholder="Height" required>
+        </div>
+        <div>
+            <label for="Weight">Weight (in kilograms):</label>
+            <input type="number" name="Weight" step="0.01" placeholder="Weight" required>
+        </div> 
+        -->
         <button type="submit">Predict</button>
     </form>
 
@@ -76,8 +102,8 @@
         <div id="seconds" class="time-component">{{ components.seconds }} seconds</div>
     </div>
     <script>
-        // Start the countdown with the initial values
-        startCountdown({{ components|tojson|safe }})
+        // Start the countdown with the initial values (idea from ChatGPT)
+        startCountdown({{ components| tojson | safe }})
     </script>
     {% endif %}
 
@@ -91,48 +117,69 @@
             align-items: center;
             height: 100vh;
             flex-direction: column;
-            background: url('/static/images/background.png') no-repeat center center fixed; 
+            background: url('/static/images/background.png') no-repeat center center fixed;
             background-size: cover;
         }
 
         .time-component {
-        background-color: white; /* White background */
-        padding: 10px; /* Padding inside the box */
-        margin: 5px; /* Margin outside the box */
-        border-radius: 5px; /* Rounded corners */
-        box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.2); /* Box shadow for depth */
-        display: inline-block; /* Display components in a line */
-        min-width: 100px; /* Minimum width for each box */
-        text-align: center; /* Center the text inside the box */
+            background-color: white;
+            /* White background */
+            padding: 10px;
+            /* Padding inside the box */
+            margin: 5px;
+            /* Margin outside the box */
+            border-radius: 5px;
+            /* Rounded corners */
+            box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.2);
+            /* Box shadow for depth */
+            display: inline-block;
+            /* Display components in a line */
+            min-width: 100px;
+            /* Minimum width for each box */
+            text-align: center;
+            /* Center the text inside the box */
         }
 
         .prediction-label {
-            font-size: 1.5em; /* Larger font size for label */
-            text-align: center; /* Center the label */
+            font-size: 2em;
+            /* Larger font size for label */
+            text-align: center;
+            /* Center the label */
             margin-top: 20px;
         }
+
         .prediction-container {
-            text-align: center; /* Center the text */
+            text-align: center;
+            /* Center the text */
             margin-top: 10px;
         }
+
         .prediction-part {
             background-color: rgba(255, 255, 255, 0.8);
-            display: inline-block; /* Display parts inline */
+            display: inline-block;
+            /* Display parts inline */
             margin: 5px;
             padding: 10px;
-            border-radius: 5px; /* Rounded corners for the boxes */
-            box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.2); /* A subtle shadow */
+            border-radius: 5px;
+            /* Rounded corners for the boxes */
+            box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.2);
+            /* A subtle shadow */
         }
 
         form {
-            background: rgba(255, 255, 255, 0.8); 
+            background: rgba(255, 255, 255, 0.8);
             padding: 20px;
             border-radius: 8px;
             margin-bottom: 20px;
         }
-        label, select, input, button {
+
+        label,
+        select,
+        input,
+        button {
             margin: 5px;
         }
     </style>
 </body>
+
 </html>

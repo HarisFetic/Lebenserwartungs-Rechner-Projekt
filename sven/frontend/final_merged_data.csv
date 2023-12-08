@@ -1,5 +1,5 @@
 Entity,Code,Year,Sex,Age,Remaining Life Expectancy,Gov expenditure on education (%),Internet usage (% of population),Access to electricity (% of population),Access to Sanitation (% of population),Smoking Adults (% of population),GDP ($),Meat consumption in kg per year per capita,ObesityRate (BMI > 30),Healthcare spending (% of GDP),"air pollution, annual exposure (micrograms per cubic meter)",Electoral democracy index
-Algeria,DZA,2000,Female,0,71.9487,4.982848571428571,0.4917057,98.9731,58.85,22.2,270391670000.0,18.933718,15.0,2.5108278,37.53605,0.326
+Algeria,DZA,2000,Female,0,71.9487,4.982848571428571,0.4917057,98.9731,58.85,22.2,270391670000.0,18.933718,0.0,2.5108278,37.53605,0.326
 Algeria,DZA,2001,Female,0,72.1968,4.90212,0.646114,98.96687,59.19,22.12,278503420000.0,17.341906,15.5,2.9254992,37.200605200000005,0.326
 Algeria,DZA,2002,Female,0,72.5595,4.821391428571428,1.5916413,98.95306,59.53,22.04,294099600000.0,18.096855,16.1,2.8079257,36.8651604,0.329
 Algeria,DZA,2003,Female,0,72.2499,4.740662857142857,2.1953597,98.93401,59.86,21.96,315274800000.0,19.324575,16.7,2.7617898,36.5297156,0.335

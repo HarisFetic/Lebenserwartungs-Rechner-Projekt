@@ -26,10 +26,11 @@ class NeuralNet(nn.Module):
     
 app = Flask(__name__)
 
-# Create an instance of the model and load the state dict
-model = NeuralNet(22)  # input size
-model.load_state_dict(torch.load('FNN_model.pth'))
-model.eval()  # Set the model to evaluation mode
+# Load models
+xgb_model_binary = joblib.load('xgb_model_binary.joblib')
+fnn_model = NeuralNet(22)
+fnn_model.load_state_dict(torch.load('FNN_model.pth'))
+fnn_model.eval()
 
 # Load the StandardScaler
 scaler = joblib.load('scaler.save')
@@ -51,7 +52,10 @@ def predict():
     input_age = float(request.form.get('Age'))
     sex = request.form.get('Sex')  # 'Male' or 'Female'
     country_name = request.form.get('Country')
-
+    smoking_status = request.form.get('Smoking')
+    # height = float(request.form.get('Height'))  # in meters
+    # weight = float(request.form.get('Weight'))  # in kilograms
+    
     # Binary encode sex
     sex_encoding = [1, 0] if sex == 'Male' else [0, 1]
 
@@ -61,6 +65,18 @@ def predict():
     # Predefined age groups and find the closest age group to the user's input
     age_groups = [0, 10, 15, 25, 45, 65, 80]
     closest_age = min(age_groups, key=lambda x: abs(x - input_age))
+
+    # Set Smoking Adults (% of population) based on smoking status
+    if smoking_status == 'Yes':
+        smoking_value = 100
+    else:
+        smoking_value = 0
+
+    # Calculate if persoon is obese
+    # if weight / (height ** 2) > 30:
+        # bmi =100
+        # else:
+        # bmi = 0
 
     # Debug: Print column names of the loaded DataFrame
     print("Columns in comparison_data:", comparison_data.columns.tolist())
@@ -78,10 +94,13 @@ def predict():
     # Convert the matched row to a DataFrame
     feature_vector_df = pd.DataFrame([matched_row.iloc[0]])
 
-    # Update sex and country encoding
+    # Update feature vector 
     feature_vector_df['Sex_0'], feature_vector_df['Sex_1'] = sex_encoding
     for i, val in enumerate(country_encoding):
         feature_vector_df[f'Entity_{i}'] = val
+    feature_vector_df['Smoking Adults (% of population)'] = smoking_value
+    # feature_vector_df['ObesityRate (BMI > 30)'] = bmi
+    
 
     # Define required columns
     required_columns = ['Entity_0', 'Entity_1', 'Entity_2', 'Entity_3', 'Entity_4', 
@@ -93,20 +112,30 @@ def predict():
                         'Healthcare spending (% of GDP)', 
                         'air pollution, annual exposure (micrograms per cubic meter)', 
                         'Electoral democracy index']
+    
+    # Get the selected model from the form
+    selected_model = request.form.get('Model')
 
-    # Ensure the feature vector is in the correct order
+    # Prepare the feature vector so its in the right order
     feature_vector = feature_vector_df[required_columns].to_numpy().flatten()
-
-    # Scale the features
+    
+    # Scaled features for the neural network
     scaled_features = scaler.transform([feature_vector])
 
-    # Convert to tensor
-    input_tensor = torch.tensor(scaled_features, dtype=torch.float32)
+    # Get the selected model from the form
+    selected_model = request.form.get('Model')
 
-    # Make a prediction
-    with torch.no_grad():
-        prediction_tensor = model(input_tensor)
-        prediction = prediction_tensor.item()  # Convert to a regular Python number
+    # Make a prediction based on the selected model
+    if selected_model == 'FNN':
+        input_tensor = torch.tensor(scaled_features, dtype=torch.float32)
+        with torch.no_grad():
+            prediction_tensor = fnn_model(input_tensor)
+            prediction = prediction_tensor.item()
+    elif selected_model == 'XGBoost':
+        # For XGBoost, use the unscaled feature vector
+        prediction = xgb_model_binary.predict([feature_vector])[0]
+
+
 
     # Break down the prediction into years, days, hours, minutes, and seconds
     years = int(prediction)
@@ -118,8 +147,6 @@ def predict():
     minutes = int(minutes_fraction)
     seconds = int((minutes_fraction - minutes) * 60)
 
-    # prediction_text = f'Predicted Remaining Life Expectancy: {years} years, {days} days, {hours} hours, {minutes} minutes, {seconds} seconds'
-
 
     # Extract the components of the remaining life expectancy
     components = {
@@ -129,6 +156,8 @@ def predict():
         'minutes': minutes,
         'seconds': seconds
     }
+
+    
 
     return render_template('index.html', components=components,
                            countries=countries_df['Entity'].tolist(), request=request)
