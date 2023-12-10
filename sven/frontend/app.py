@@ -60,11 +60,11 @@ def predict():
     sex_encoding = [1, 0] if sex == 'Male' else [0, 1]
 
     # Convert country name to binary encoding
-    country_encoding = list(country_encodings[country_name].values())
+    country_encoding = list(country_encodings[country_name].values()) # (ChatGPT, 2023)
 
     # Predefined age groups and find the closest age group to the user's input
     age_groups = [0, 10, 15, 25, 45, 65, 80]
-    closest_age = min(age_groups, key=lambda x: abs(x - input_age))
+    closest_age = min(age_groups, key=lambda x: abs(x - input_age)) # (ChatGPT, 2023)
 
     # Set Smoking Adults (% of population) based on smoking status
     if smoking_status == 'Yes':
@@ -117,7 +117,7 @@ def predict():
     selected_model = request.form.get('Model')
 
     # Prepare the feature vector so its in the right order
-    feature_vector = feature_vector_df[required_columns].to_numpy().flatten()
+    feature_vector = feature_vector_df[required_columns].to_numpy().flatten() # (ChatGPT, 2023)
     
     # Scaled features for the neural network
     scaled_features = scaler.transform([feature_vector])
@@ -133,7 +133,7 @@ def predict():
             prediction = prediction_tensor.item()
     elif selected_model == 'XGBoost':
         # For XGBoost, use the unscaled feature vector
-        prediction = xgb_model_binary.predict([feature_vector])[0]
+        prediction = xgb_model_binary.predict([feature_vector])[0] # (ChatGPT, 2023)
 
 
 
